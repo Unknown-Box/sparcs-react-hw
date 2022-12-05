@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>sparcs react hw</title>
+        <style>
+          body {
+              min-height: 100vh;
+              margin: 0;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              background-color: white;
+              background: linear-gradient(112deg, lightslategray, transparent), 
+                          linear-gradient(76deg, gainsboro, transparent), 
+                          linear-gradient(215deg, ghostwhite, transparent), 
+                          linear-gradient(330deg, lightgray, transparent);
+          }
+
+          body > section {
+              width: 1060px;
+              height: 795px;
+              box-shadow: 0px 0px 8px gray;
+              background-color: whitesmoke;
+          }
+
+          body > section > h1 {
+              width: 80%;
+              margin-left: auto;
+              margin-right: auto;
+          }
+
+          body > section > form {
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+          }
+
+          body > section > form > * {
+            margin: 8px;
+            display: inline-block;
+          }
+
+          body > section > article > table {
+              width: 80%;
+              margin: auto;
+              position: relative;
+          }
+
+          body > section > article > table > thead {
+              height: 24px;
+          }
+
+          body > section > article > table tr {
+              padding: 8px 0px;
+              display: grid;
+              grid-template-columns: 3fr 8fr 1fr 2fr;
+          }
+
+          body > section > article > table tr > :not(:nth-child(2)) {
+              text-align: center;
+          }
+
+          body > section > article > table > thead > tr {
+              border-top: 3px double gray;
+              border-bottom: 3px double gray;
+          }
+
+          body > section > article > table > thead > tr > th {
+              font-size: 16px;
+              font-weight: bold;
+          }
+
+          body > section > article > table > tbody > tr {
+              font-size: 16px;
+              border-bottom: 2px solid gainsboro;
+          }
+
+          body > section > article > table > tbody > tr > td {
+            overflow: hidden;
+            word-wrap: break-word;
+            word-break: break-all;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+        </style>
+    </head>
+    <body>
+        <section id="main"></section>
+        <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <script type="text/babel">
+var  DOMRoot = document.getElementById('main')
+var vDOMRoot = ReactDOM.createRoot(DOMRoot);
+
+function App(props) {
+    var [ todolist, setTodolist ] = React.useState([]);
+    var header = Object.keys(todolist[0] ?? {});
+    var body = todolist.map(Object.values);
+
+    function addTodo(event) {
+      var form = document.querySelector('form');
+      var title = form.querySelector('input[name="title"]')?.value;
+      var description = form.querySelector('input[name="description"]')?.value;
+      var priority = form.querySelector('input[name="priority"]:checked')?.value;
+      var deadline = form.querySelector('input[name="deadline"]')?.value;
+
+      if (!!title && !!description && !!priority && !!deadline){
+        var todo = { title, description, priority, deadline }
+        setTodolist([...todolist, todo]);
+        return todo;
+      }
+      else {
+        alert(`${!title ? 'title' : ''} ${!description ? 'description' : ''} ${!priority ? 'priority' : ''} ${!deadline ? 'deadline' : ''} required`);
+        return null;
+      }
+    }
+
+    return (
+        <React.Fragment>
+            <h1>{props.username}'s Todo List</h1>
+            <form>
+                <input type="text" name="title" placeholder="title" />
+                <input type="text" name="description" placeholder="description" />
+                <label>
+                  high
+                  <input type="radio" name="priority" value="0" />
+                </label>
+                <label>
+                  middle
+                  <input type="radio" name="priority" value="1" />
+                </label>
+                <label>
+                  low
+                  <input type="radio" name="priority" value="2" />
+                </label>
+                <input type="date" name="deadline" />
+                <button type="button" onClick={addTodo}>add</button>
+            </form>
+            <article>
+                <SortableTable tableHeader={header} tableBody={body} />
+            </article>
+        </React.Fragment>
+    );
+}
+
+function SortableTable(props) {
+    var { tableHeader, tableBody } = props;
+    var [ sortOption, setSortOption ] = React.useState({
+        by: 0, 
+        order: 0
+    });
+
+    var setSortOptionWrapper = (index) => (event) => {
+        var { by, order } = sortOption;
+        setSortOption({
+            by: index, 
+            order: by !== index ? 0 : order ^ 1
+        })
+    }
+
+    tableBody.sort((a, b) => {
+        var { by, order } = sortOption;
+        if (a[by] === b[by]) return 0;
+        else if (a[by] < b[by]) return -1 * (order ? -1 : 1);
+        else return 1 * (order ? -1 : 1);
+    });
+
+    console.log(tableHeader, tableBody)
+    var tbody = tableBody.map((row, index) => (
+        <tr key={index}>
+            {row.map((column, index) => (
+                <td key={index}>{column}</td>
+            ))}
+        </tr>
+    ))
+
+    return (
+        <table>
+            <thead>
+                <tr>
+                    {tableHeader.map((entry, index) => (
+                        <th key={index.toString()}>
+                            <a onClick={setSortOptionWrapper(index)}>{entry}</a>
+                        </th>
+                    ))}
+                </tr>
+            </thead>
+            <tbody>
+                {tbody}
+            </tbody>
+        </table>
+    )
+}
+
+
+vDOMRoot.render(<App username="Paul" />)
+        </script>
+    </body>
+</html>
